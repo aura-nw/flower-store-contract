@@ -1,6 +1,6 @@
+use crate::state::Flower;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use crate::state::{Flower};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct InstantiateMsg {

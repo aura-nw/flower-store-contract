@@ -16,7 +16,6 @@ pub enum ContractError {
     IDNotExists { id: String },
 
     #[error("ID has been taken (id {id})")]
-    IDTaken { id: String },
-
+    IDTaken { id: String }
     // Look at https://docs.rs/thiserror/1.0.21/thiserror/ for details.
 }

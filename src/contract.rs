@@ -78,7 +78,7 @@ pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, Contract
     store(deps.storage).update(key, |record| {
         if let Some(mut record) = record {
             if amount > record.amount {
-                return Err(ContractError::NotEnoughAmount {})
+                return Err(ContractError::NotEnoughAmount {});
             }
             record.amount -= amount;
             Ok(record)
