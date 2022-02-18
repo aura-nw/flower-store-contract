@@ -56,10 +56,10 @@ pub fn add_new(
     price: i32,
 ) -> Result<Response, ContractError> {
     let flower = Flower {
-        id: id,
-        name: name,
-        amount: amount,
-        price: price,
+        id,
+        name,
+        amount,
+        price,
     };
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     let key = flower.id.as_bytes();
@@ -99,10 +99,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 
 fn query_flower(deps: Deps, id: String) -> StdResult<Binary> {
     let key = id.as_bytes();
-    let flower = match store_query(deps.storage).may_load(key)? {
-        Some(record) => Some(record),
-        None => None,
-    };
+    let flower = store_query(deps.storage).may_load(key)?;
     let resp = FlowerInfoResponse { flower };
     to_binary(&resp)
 }
