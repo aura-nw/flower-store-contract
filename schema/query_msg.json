@@ -5,11 +5,19 @@
     {
       "type": "object",
       "required": [
-        "get_count"
+        "get_flower"
       ],
       "properties": {
-        "get_count": {
-          "type": "object"
+        "get_flower": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
         }
       },
       "additionalProperties": false

@@ -1,3 +1,5 @@
+use std::fmt;
+
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -14,6 +16,18 @@ pub struct Flower {
     pub name: String,
     pub amount: i32,
     pub price: i32,
+}
+
+// Implement `Display` for `MinMax`.
+impl fmt::Display for Flower {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Use `self.number` to refer to each positional data point.
+        write!(
+            f,
+            "({}, {},{},{})",
+            self.id, self.name, self.amount, self.price
+        )
+    }
 }
 
 // pub const FLOWER: Map<'a, (&'a String, &'a id), Expiration> = Map::new("flower");

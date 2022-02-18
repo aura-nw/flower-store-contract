@@ -5,11 +5,33 @@
     {
       "type": "object",
       "required": [
-        "increment"
+        "add_new"
       ],
       "properties": {
-        "increment": {
-          "type": "object"
+        "add_new": {
+          "type": "object",
+          "required": [
+            "amount",
+            "id",
+            "name",
+            "price"
+          ],
+          "properties": {
+            "amount": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "price": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
         }
       },
       "additionalProperties": false
@@ -17,18 +39,22 @@
     {
       "type": "object",
       "required": [
-        "reset"
+        "sell"
       ],
       "properties": {
-        "reset": {
+        "sell": {
           "type": "object",
           "required": [
-            "count"
+            "amount",
+            "id"
           ],
           "properties": {
-            "count": {
+            "amount": {
               "type": "integer",
               "format": "int32"
+            },
+            "id": {
+              "type": "string"
             }
           }
         }

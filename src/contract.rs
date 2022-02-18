@@ -4,18 +4,18 @@ use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response,
 use cw2::set_contract_version;
 
 use crate::error::ContractError;
-use crate::msg::{CountResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{Flower, FLOWER};
+use crate::msg::{ExecuteMsg, FlowerInfoResponse, InstantiateMsg, QueryMsg};
+use crate::state::{store, store_query, Flower};
 
 // version info for migration info
-const CONTRACT_NAME: &str = "crates.io:foo";
+const CONTRACT_NAME: &str = "crates.io:flower_store";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
     deps: DepsMut,
     _env: Env,
-    info: MessageInfo,
+    _info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
     let flower = Flower {
@@ -25,8 +25,8 @@ pub fn instantiate(
         price: msg.price,
     };
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-    FLOWER.save(deps.storage, &flower)?;
-
+    let key = flower.id.as_bytes();
+    store(deps.storage).save(key, &flower)?;
     Ok(Response::default())
 }
 
@@ -34,7 +34,7 @@ pub fn instantiate(
 pub fn execute(
     deps: DepsMut,
     _env: Env,
-    info: MessageInfo,
+    _info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
@@ -44,8 +44,7 @@ pub fn execute(
             amount,
             price,
         } => add_new(deps, id, name, amount, price),
-
-        ExecuteMsg::Sell { .. } => sell(deps, msg),
+        ExecuteMsg::Sell { id, amount } => sell(deps, id, amount),
     }
 }
 
@@ -63,34 +62,49 @@ pub fn add_new(
         price: price,
     };
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-    let flower = FLOWER.load(deps.storage)?;
-    FLOWER.save(deps.storage, &flower)?;
+    let key = flower.id.as_bytes();
+    if (store(deps.storage).may_load(key)?).is_some() {
+        // id is already taken
+        return Err(ContractError::IDTaken { id: flower.id });
+    }
+    store(deps.storage).save(key, &flower)?;
     Ok(Response::new()
         .add_attribute("method", "add_new")
         .add_attribute("id", flower.id))
 }
 
-pub fn sell(deps: DepsMut, id: i32, amount: i32) -> Result<Response, ContractError> {
-    FLOWER.update(deps.storage, |mut flower| -> Result<_, ContractError> {
-        flower.amount += amount;
-        Ok(flower)
+pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, ContractError> {
+    let key = id.as_bytes();
+    store(deps.storage).update(key, |record| {
+        if let Some(mut record) = record {
+            if amount > record.amount {
+                return Err(ContractError::NotEnoughAmount {})
+            }
+            record.amount -= amount;
+            Ok(record)
+        } else {
+            Err(ContractError::IDNotExists { id: id.clone() })
+        }
     })?;
 
-    Ok(Response::new().add_attribute("method", "add_new"))
+    Ok(Response::new().add_attribute("method", "sell"))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::GetCount {} => to_binary(&query_count(deps)?),
+        QueryMsg::GetFlower { id } => query_flower(deps, id),
     }
 }
 
-fn query_count(deps: Deps) -> StdResult<CountResponse> {
-    let flower = FLOWER.load(deps.storage)?;
-    Ok(CountResponse {
-        count: flower.count,
-    })
+fn query_flower(deps: Deps, id: String) -> StdResult<Binary> {
+    let key = id.as_bytes();
+    let flower = match store_query(deps.storage).may_load(key)? {
+        Some(record) => Some(record),
+        None => None,
+    };
+    let resp = FlowerInfoResponse { flower };
+    to_binary(&resp)
 }
 
 #[cfg(test)]
@@ -100,66 +114,101 @@ mod tests {
     use cosmwasm_std::{coins, from_binary};
 
     #[test]
-    fn proper_initialization() {
+    fn initialization() {
         let mut deps = mock_dependencies_with_balance(&coins(2, "token"));
 
-        let msg = InstantiateMsg { count: 17 };
+        let msg = InstantiateMsg {
+            name: "rose".to_string(),
+            amount: 10,
+            price: 10,
+        };
         let info = mock_info("creator", &coins(1000, "earth"));
-
         // we can just call .unwrap() to assert this was a success
         let res = instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
         assert_eq!(0, res.messages.len());
-
         // it worked, let's query the flower
-        let res = query(deps.as_ref(), mock_env(), QueryMsg::GetCount {}).unwrap();
-        let value: CountResponse = from_binary(&res).unwrap();
-        assert_eq!(17, value.count);
+        let res = query(
+            deps.as_ref(),
+            mock_env(),
+            QueryMsg::GetFlower {
+                id: "0".to_string(),
+            },
+        )
+        .unwrap();
+        let flower = Flower {
+            id: "0".to_string(),
+            name: "rose".to_string(),
+            amount: 10,
+            price: 10,
+        };
+        let expected = FlowerInfoResponse {
+            flower: Some(flower),
+        };
+        let value: FlowerInfoResponse = from_binary(&res).unwrap();
+        assert_eq!(expected, value);
     }
 
     #[test]
-    fn increment() {
+    fn works_with_add_new_and_sell() {
         let mut deps = mock_dependencies_with_balance(&coins(2, "token"));
 
-        let msg = InstantiateMsg { count: 17 };
-        let info = mock_info("creator", &coins(2, "token"));
-        let _res = instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
+        let msg = ExecuteMsg::AddNew {
+            id: "lily_id".to_string(),
+            name: "lily".to_string(),
+            amount: 100,
+            price: 100,
+        };
+        let info = mock_info("creator", &coins(1000, "earth"));
+        // we can just call .unwrap() to assert this was a success
+        let res = execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+        assert_eq!(0, res.messages.len());
+        // it worked, let's query the flower
+        let res = query(
+            deps.as_ref(),
+            mock_env(),
+            QueryMsg::GetFlower {
+                id: "lily_id".to_string(),
+            },
+        )
+        .unwrap();
+        let flower = Flower {
+            id: "lily_id".to_string(),
+            name: "lily".to_string(),
+            amount: 100,
+            price: 100,
+        };
+        let expected = FlowerInfoResponse {
+            flower: Some(flower),
+        };
+        let value: FlowerInfoResponse = from_binary(&res).unwrap();
+        assert_eq!(expected, value);
 
-        // beneficiary can release it
-        let info = mock_info("anyone", &coins(2, "token"));
-        let msg = ExecuteMsg::Increment {};
-        let _res = execute(deps.as_mut(), mock_env(), info, msg).unwrap();
-
-        // should increase counter by 1
-        let res = query(deps.as_ref(), mock_env(), QueryMsg::GetCount {}).unwrap();
-        let value: CountResponse = from_binary(&res).unwrap();
-        assert_eq!(18, value.count);
-    }
-
-    #[test]
-    fn reset() {
-        let mut deps = mock_dependencies_with_balance(&coins(2, "token"));
-
-        let msg = InstantiateMsg { count: 17 };
-        let info = mock_info("creator", &coins(2, "token"));
-        let _res = instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
-
-        // beneficiary can release it
-        let unauth_info = mock_info("anyone", &coins(2, "token"));
-        let msg = ExecuteMsg::Reset { count: 5 };
-        let res = execute(deps.as_mut(), mock_env(), unauth_info, msg);
-        match res {
-            Err(ContractError::Unauthorized {}) => {}
-            _ => panic!("Must return unauthorized error"),
-        }
-
-        // only the original creator can reset the counter
-        let auth_info = mock_info("creator", &coins(2, "token"));
-        let msg = ExecuteMsg::Reset { count: 5 };
-        let _res = execute(deps.as_mut(), mock_env(), auth_info, msg).unwrap();
-
-        // should now be 5
-        let res = query(deps.as_ref(), mock_env(), QueryMsg::GetCount {}).unwrap();
-        let value: CountResponse = from_binary(&res).unwrap();
-        assert_eq!(5, value.count);
+        let msg = ExecuteMsg::Sell {
+            id: "lily_id".to_string(),
+            amount: 45,
+        };
+        let info = mock_info("creator", &coins(1000, "earth"));
+        let res = execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+        assert_eq!(0, res.messages.len());
+        // it worked, let's query the flower
+        let res = query(
+            deps.as_ref(),
+            mock_env(),
+            QueryMsg::GetFlower {
+                id: "lily_id".to_string(),
+            },
+        )
+        .unwrap();
+        let flower = Flower {
+            id: "lily_id".to_string(),
+            name: "lily".to_string(),
+            amount: 55,
+            price: 100,
+        };
+        let expected = FlowerInfoResponse {
+            flower: Some(flower),
+        };
+        let value: FlowerInfoResponse = from_binary(&res).unwrap();
+        assert_eq!(expected, value);
     }
 }
