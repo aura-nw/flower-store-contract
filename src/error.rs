@@ -13,9 +13,9 @@ pub enum ContractError {
     NotEnoughAmount {},
 
     #[error("ID does not exist (id {id})")]
-    IDNotExists { id: String },
+    IdNotExists { id: String },
 
     #[error("ID has been taken (id {id})")]
-    IDTaken { id: String },
+    IdTaken { id: String },
     // Look at https://docs.rs/thiserror/1.0.21/thiserror/ for details.
 }

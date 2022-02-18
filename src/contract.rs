@@ -65,7 +65,7 @@ pub fn add_new(
     let key = flower.id.as_bytes();
     if (store(deps.storage).may_load(key)?).is_some() {
         // id is already taken
-        return Err(ContractError::IDTaken { id: flower.id });
+        return Err(ContractError::IdTaken { id: flower.id });
     }
     store(deps.storage).save(key, &flower)?;
     Ok(Response::new()
@@ -83,7 +83,7 @@ pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, Contract
             record.amount -= amount;
             Ok(record)
         } else {
-            Err(ContractError::IDNotExists { id: id.clone() })
+            Err(ContractError::IdNotExists { id: id.clone() })
         }
     })?;
 
