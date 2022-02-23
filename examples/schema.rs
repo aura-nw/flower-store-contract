@@ -3,8 +3,8 @@ use std::fs::create_dir_all;
 
 use cosmwasm_schema::{export_schema, remove_schemas, schema_for};
 
-use foo::msg::{ExecuteMsg, FlowerInfoResponse, InstantiateMsg, QueryMsg};
-use foo::state::Flower;
+use flower_store::msg::{ExecuteMsg, FlowerInfoResponse, InstantiateMsg, QueryMsg};
+use flower_store::state::Flower;
 
 fn main() {
     let mut out_dir = current_dir().unwrap();
