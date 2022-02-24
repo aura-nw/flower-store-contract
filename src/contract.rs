@@ -1,6 +1,8 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+use cosmwasm_std::{
+    to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult,
+};
 
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, FlowerInfoResponse, InstantiateMsg, QueryMsg};
@@ -93,7 +95,11 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 
 fn query_flower(deps: Deps, id: String) -> StdResult<Binary> {
     let key = id.as_bytes();
-    let flower = store_query(deps.storage).may_load(key)?;
+    let flower = match store_query(deps.storage).may_load(key)? {
+        Some(flower) => Some(flower),
+        None => return Err(StdError::generic_err("Flower does not exist")),
+    };
+
     let resp = FlowerInfoResponse { flower };
     to_binary(&resp)
 }
@@ -102,7 +108,7 @@ fn query_flower(deps: Deps, id: String) -> StdResult<Binary> {
 mod tests {
     use super::*;
     use cosmwasm_std::testing::{mock_dependencies_with_balance, mock_env, mock_info};
-    use cosmwasm_std::{coins, from_binary};
+    use cosmwasm_std::{coins, from_binary, StdError};
 
     #[test]
     fn initialization() {
@@ -137,6 +143,81 @@ mod tests {
         };
         let value: FlowerInfoResponse = from_binary(&res).unwrap();
         assert_eq!(expected, value);
+    }
+
+    #[test]
+    fn not_works_with_add_new_id_existed() {
+        let mut deps = mock_dependencies_with_balance(&coins(2, "token"));
+        let lily_id = "lily_id";
+        let msg_asiatic = ExecuteMsg::AddNew {
+            id: lily_id.to_string(),
+            name: "Asiatic lilies".to_string(),
+            amount: 100,
+            price: 100,
+        };
+        let info = mock_info("creator", &coins(1000, "earth"));
+        // we can just call .unwrap() to assert this was a success
+        let res = execute(deps.as_mut(), mock_env(), info, msg_asiatic).unwrap();
+        assert_eq!(0, res.messages.len());
+
+        let info = mock_info("creator", &coins(1000, "earth"));
+        let msg_oriental = ExecuteMsg::AddNew {
+            id: lily_id.to_string(),
+            name: "Oriental lilies".to_string(),
+            amount: 100,
+            price: 100,
+        };
+        let err = execute(deps.as_mut(), mock_env(), info, msg_oriental).unwrap_err();
+        match err {
+            ContractError::IdTaken { id } => {
+                assert_eq!(lily_id.to_string(), id);
+            }
+            e => panic!("unexpected error: {}", e),
+        }
+    }
+
+    #[test]
+    fn not_works_with_sell() {
+        let mut deps = mock_dependencies_with_balance(&coins(2, "token"));
+        let lily_id = "lily_id";
+        let msg_add_new = ExecuteMsg::AddNew {
+            id: lily_id.to_string(),
+            name: "Asiatic lilies".to_string(),
+            amount: 100,
+            price: 100,
+        };
+        let info = mock_info("creator", &coins(1000, "earth"));
+        // we can just call .unwrap() to assert this was a success
+        let res = execute(deps.as_mut(), mock_env(), info, msg_add_new).unwrap();
+        assert_eq!(0, res.messages.len());
+
+        let msg_sell = ExecuteMsg::Sell {
+            id: "lily_id".to_string(),
+            amount: 101,
+        };
+        let info = mock_info("creator", &coins(1000, "earth"));
+        let err = execute(deps.as_mut(), mock_env(), info, msg_sell).unwrap_err();
+        match err {
+            ContractError::NotEnoughAmount {} => {}
+            e => panic!("unexpected error: {}", e),
+        }
+    }
+
+    #[test]
+    fn not_works_with_query() {
+        let ref deps = mock_dependencies_with_balance(&coins(2, "token"));
+        let err = query(
+            deps.as_ref(),
+            mock_env(),
+            QueryMsg::GetFlower {
+                id: "not_existed_id".to_string(),
+            },
+        );
+        match err {
+            Err(StdError::GenericErr { msg, .. }) => assert_eq!(msg, "Flower does not exist"),
+            Err(e) => panic!("Unexpected error: {:?}", e),
+            _ => panic!("Must return error"),
+        }
     }
 
     #[test]
