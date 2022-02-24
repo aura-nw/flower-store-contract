@@ -1,15 +1,10 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
-use cw2::set_contract_version;
 
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, FlowerInfoResponse, InstantiateMsg, QueryMsg};
 use crate::state::{store, store_query, Flower};
-
-// version info for migration info
-const CONTRACT_NAME: &str = "crates.io:flower_store";
-const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -24,7 +19,6 @@ pub fn instantiate(
         amount: msg.amount,
         price: msg.price,
     };
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     let key = flower.id.as_bytes();
     store(deps.storage).save(key, &flower)?;
     Ok(Response::default())
@@ -61,7 +55,6 @@ pub fn add_new(
         amount,
         price,
     };
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     let key = flower.id.as_bytes();
     if (store(deps.storage).may_load(key)?).is_some() {
         // id is already taken
@@ -78,6 +71,7 @@ pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, Contract
     store(deps.storage).update(key, |record| {
         if let Some(mut record) = record {
             if amount > record.amount {
+                //The amount of flowers left is not enough
                 return Err(ContractError::NotEnoughAmount {});
             }
             record.amount -= amount;

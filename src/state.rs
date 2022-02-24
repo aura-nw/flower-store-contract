@@ -1,12 +1,8 @@
-use std::fmt;
-
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use cosmwasm_storage::{bucket, bucket_read, Bucket, ReadonlyBucket};
-
 use cosmwasm_std::Storage;
-// use cw_storage_plus::Map;
 
 static STORE_KEY: &[u8] = b"store";
 
