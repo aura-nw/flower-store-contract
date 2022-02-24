@@ -18,20 +18,6 @@ pub struct Flower {
     pub price: i32,
 }
 
-// Implement `Display` for `MinMax`.
-impl fmt::Display for Flower {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // Use `self.number` to refer to each positional data point.
-        write!(
-            f,
-            "({}, {},{},{})",
-            self.id, self.name, self.amount, self.price
-        )
-    }
-}
-
-// pub const FLOWER: Map<'a, (&'a String, &'a id), Expiration> = Map::new("flower");
-
 pub fn store(storage: &mut dyn Storage) -> Bucket<Flower> {
     bucket(storage, STORE_KEY)
 }
