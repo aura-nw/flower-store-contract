@@ -1,6 +1,9 @@
 <h1 align="center">Welcome to flower-store-contract 👋</h1>
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
+  <img alt="Version" src="https://img.shields.io/badge/go-v1.17%2B-brightgreen" />
+  <img alt="Version" src="https://img.shields.io/badge/cargo-v1.55.0%2B-yellowgreen" />
+  <img alt="Version" src="https://img.shields.io/badge/rustc-%20-lightgrey" />
 </p>
 
 
