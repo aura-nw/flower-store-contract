@@ -82,7 +82,7 @@ Following, how to develop contract will be explained based on an example of a fl
 
 ## State
 This is basically a key-value store which is updated as a result of transactions and chaincode execution.  
-At [src/state.rs](https://github.com/aura-nw/flower-store-contract/blob/foo/src/state.rs), we will create a state with the name _flower_ :
+At [src/state.rs](https://github.com/aura-nw/flower-store-contract/blob/main/src/state.rs), we will create a state with the name _flower_ :
 
 ```Rust
 use cosmwasm_storage::{bucket, bucket_read, Bucket, ReadonlyBucket};
@@ -112,7 +112,7 @@ We will handle the state through 2 functions _store_ and _store_query_.
 
 ## Messages
 
-Next comes the file [src/msg.rs](https://github.com/aura-nw/flower-store-contract/blob/foo/src/msg.rs) where the contract's input/out messages are defined.  
+Next comes the file [src/msg.rs](https://github.com/aura-nw/flower-store-contract/blob/main/src/msg.rs) where the contract's input/out messages are defined.  
 There are 3 basic types of messages:  
 - InstantiateMsg
 - ExecuteMsg
@@ -174,7 +174,7 @@ In FlowerInfoResponse struct, we define folower with Option<Flower> type, someti
   
 ## Contract Handle
   
-At [src/contract.rs](https://github.com/aura-nw/flower-store-contract/blob/foo/src/contract.rs) file, method handles for predefined message are the same as route functions.  
+At [src/contract.rs](https://github.com/aura-nw/flower-store-contract/blob/main/src/contract.rs) file, method handles for predefined message are the same as route functions.  
 
 ### Instantiate
   
@@ -273,7 +273,7 @@ In the _execute_ function, there are 2 line of the code that return an error whe
   return Err(ContractError::NotEnoughAmount {});
 ```
 
-These structures need to be defined at [src/contract.rs](https://github.com/aura-nw/flower-store-contract/blob/foo/src/contract.rs).
+These structures need to be defined at [src/contract.rs](https://github.com/aura-nw/flower-store-contract/blob/main/src/contract.rs).
 ```rust
 #[derive(Error, Debug)]
 pub enum ContractError {
@@ -339,7 +339,7 @@ We can also generate JSON Schemas that serve as a guide for anyone trying to use
 ```sh
 cargo schema
 ```
-You can see the generated schemas under [./schema](https://github.com/aura-nw/flower-store-contract/tree/foo/schema)
+You can see the generated schemas under [./schema](https://github.com/aura-nw/flower-store-contract/tree/main/schema)
   
 ## Testing
 ### Mock
@@ -531,7 +531,7 @@ Congratulation! Now you know how to write and deploy a contract to the system! L
 
 # License
 
-[MIT](https://github.com/aura-nw/aura-dapp-example/blob/main/LICENSE) License.
+[MIT](https://github.com/aura-nw/flower-store-contract/blob/main/LICENSE) License.
 
 
 # Show your support
