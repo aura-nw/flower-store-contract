@@ -8,7 +8,7 @@
 This example will show you how to develop and deploy a smart contract on aurad.
 
 ## Table of contents
-* [Installion](#installation)
+* [Installation](#installation)
 * [Creating a new repo from template](#creating-a-new-repo-from-template)
 * [Developing Contract](#developing-contract)
 * [Deploying Contract](#deploying-contract)
