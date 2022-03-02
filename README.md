@@ -337,6 +337,22 @@ Normally Rust compiler does its job great, leads you to the solution for the err
 cargo clippy -- -D warnings
 ```
 
+## Compile
+Basic compilation:
+```sh
+cargo wasm
+```
+Optimized compilation:
+```sh
+RUSTFLAGS='-C link-arg=-s' cargo wasm
+```
+Reproducible and optimized compilation:
+```sh
+docker run --rm -v "$(pwd)":/code \
+  --mount type=volume,source="$(basename "$(pwd)")_cache",target=/code/target \
+  --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \
+  cosmwasm/rust-optimizer:0.10.7
+```
 ## Schema
 We can also generate JSON Schemas that serve as a guide for anyone trying to use the contract. This is mainly for documentation purposes, but if you click on "Open TypeScript definitions" in the code explorer, you can see how we use those to generate TypeScript bindings.
 ```sh
@@ -503,7 +519,7 @@ Ask for tokens from faucet https://faucet-testnet.aura.network/?address={address
 ## Deploy
 ```sh
 # store contract
-RES=$(aurad tx wasm store  ../../target/wasm32-unknown-unknown/release/cw721_base.wasm --from wallet --node http://34.203.177.141:26657/ --chain-id aura-testnet --gas-prices 0.025uaura --gas auto --gas-adjustment 1.3 -y --output json)
+RES=$(aurad tx wasm store  ./target/wasm32-unknown-unknown/release/flower_store.wasm --from wallet --node https://tendermint-testnet.aura.network:443 --chain-id aura-testnet --gas-prices 0.025uaura --gas auto --gas-adjustment 1.3 -y --output json)
   
 # get the code id
 CODE_ID=$(echo $RES | jq -r '.logs[0].events[-1].attributes[0].value')
