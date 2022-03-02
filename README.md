@@ -311,7 +311,11 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 
 fn query_flower(deps: Deps, id: String) -> StdResult<Binary> {
     let key = id.as_bytes();
-    let flower = store_query(deps.storage).may_load(key)?;
+    let flower = match store_query(deps.storage).may_load(key)? {
+        Some(flower) => Some(flower),
+        None => return Err(StdError::generic_err("Flower does not exist")),
+    };
+
     let resp = FlowerInfoResponse { flower };
     to_binary(&resp)
 }
