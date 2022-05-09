@@ -49,7 +49,7 @@ Go to the folder in which you want to place it and run:
 **Latest**
 
 ```sh
-cargo generate --git https://github.com/CosmWasm/cw-template.git --name PROJECT_NAME
+cargo generate --git https://github.com/aura-nw/cw-template.git --name PROJECT_NAME
 ````
 
 **Older Version**
@@ -523,11 +523,15 @@ Ask for tokens from faucet https://faucet-testnet.aura.network/?address={address
 ## Deploy
 ```sh
 # store contract
-RES=$(aurad tx wasm store  ./target/wasm32-unknown-unknown/release/flower_store.wasm --from wallet --node https://tendermint-testnet.aura.network:443 --chain-id aura-testnet --gas-prices 0.025uaura --gas auto --gas-adjustment 1.3 -y --output json)
+RES=$(aurad tx wasm store  ./target/wasm32-unknown-unknown/release/flower_store.wasm --from wallet $TXFLAG --output json)
   
 # get the code id
 CODE_ID=$(echo $RES | jq -r '.logs[0].events[-1].attributes[0].value')
   
+In case the cli store doesn't return fully tx_result, but only returns results with txhash, we will have to get the code_id by querying from RPC:
+`CODE_ID=$(curl "https://rpc.serenity.aura.network/tx?hash=0x{txhash}"| jq -r ".result.tx_result.log"|jq -r ".[0].events[-1].attributes[0].value")`  
+Please replace the txhash above with the txhash returned in the RES. 
+ 
 # instantiate contract
 INIT='{"name":"init-flower","amount":0,"price":0}'
 aurad tx wasm instantiate $CODE_ID "$INIT" \
