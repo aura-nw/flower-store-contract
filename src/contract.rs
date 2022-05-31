@@ -41,6 +41,7 @@ pub fn execute(
             price,
         } => add_new(deps, id, name, amount, price),
         ExecuteMsg::Sell { id, amount } => sell(deps, id, amount),
+        ExecuteMsg::Buy { id, amount } => buy(deps, id, amount),
     }
 }
 
@@ -84,6 +85,20 @@ pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, Contract
     })?;
 
     Ok(Response::new().add_attribute("method", "sell"))
+}
+
+pub fn buy(deps: DepsMut, id: String, amount: i32) -> Result<Response, ContractError> {
+    let key = id.as_bytes();
+    store(deps.storage).update(key, |record| {
+        if let Some(mut record) = record {
+            record.amount += amount;
+            Ok(record)
+        } else {
+            Err(ContractError::IdNotExists { id: id.clone() })
+        }
+    })?;
+
+    Ok(Response::new().add_attribute("method", "buy"))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]

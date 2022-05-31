@@ -22,6 +22,10 @@ pub enum ExecuteMsg {
         id: String,
         amount: i32,
     },
+    Buy {
+        id: String,
+        amount: i32,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
