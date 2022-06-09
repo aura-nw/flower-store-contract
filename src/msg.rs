@@ -22,6 +22,10 @@ pub enum ExecuteMsg {
         id: String,
         amount: i32,
     },
+    Rename {
+        id: String,
+        name: String
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

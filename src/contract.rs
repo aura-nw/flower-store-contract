@@ -41,7 +41,29 @@ pub fn execute(
             price,
         } => add_new(deps, id, name, amount, price),
         ExecuteMsg::Sell { id, amount } => sell(deps, id, amount),
+        ExecuteMsg::Rename { id, name} => re_name(deps, id, name),
     }
+}
+pub fn re_name(
+    deps: DepsMut,
+    id: String,
+    name: String
+) -> Result<Response, ContractError> {
+    let key = id.as_bytes();
+    store(deps.storage).update(key, |record| {
+        if let Some(mut record) = record {
+            if name == "" {
+                //The amount of flowers left is not enough
+                return Err(ContractError::NameIsEmpty {});
+            }
+            record.name = name;
+            Ok(record)
+        } else {
+            Err(ContractError::IdNotExists { id: id.clone() })
+        }
+    })?;
+
+    Ok(Response::new().add_attribute("method", "re_name"))
 }
 
 pub fn add_new(

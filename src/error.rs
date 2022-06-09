@@ -12,6 +12,9 @@ pub enum ContractError {
     #[error("The amount of flowers left is not enough!")]
     NotEnoughAmount {},
 
+    #[error("The name can not empty")]
+    NameIsEmpty {},
+
     #[error("ID does not exist (id {id})")]
     IdNotExists { id: String },
 
