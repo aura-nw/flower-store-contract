@@ -25,7 +25,7 @@ pub enum ExecuteMsg {
     Rename {
         id: String,
         name: String,
-    }
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

@@ -41,14 +41,10 @@ pub fn execute(
             price,
         } => add_new(deps, id, name, amount, price),
         ExecuteMsg::Sell { id, amount } => sell(deps, id, amount),
-        ExecuteMsg::Rename { id, name} => re_name(deps, id, name),
+        ExecuteMsg::Rename { id, name } => re_name(deps, id, name),
     }
 }
-pub fn re_name(
-    deps: DepsMut,
-    id: String,
-    name: String
-) -> Result<Response, ContractError> {
+pub fn re_name(deps: DepsMut, id: String, name: String) -> Result<Response, ContractError> {
     let key = id.as_bytes();
     store(deps.storage).update(key, |record| {
         if let Some(mut record) = record {
@@ -87,7 +83,8 @@ pub fn add_new(
     store(deps.storage).save(key, &flower)?;
     Ok(Response::new()
         .add_attribute("method", "add_new")
-        .add_attribute("id", flower.id))
+        .add_attribute("id", flower.id)
+        .add_attribute("price", flower.price.to_string()))
 }
 
 pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, ContractError> {
@@ -105,7 +102,9 @@ pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, Contract
         }
     })?;
 
-    Ok(Response::new().add_attribute("method", "sell"))
+    Ok(Response::new()
+        .add_attribute("method", "sell")
+        .add_attribute("id", id))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
