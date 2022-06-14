@@ -24,7 +24,7 @@ pub enum ExecuteMsg {
     },
     Rename {
         id: String,
-        name: String
+        name: String,
     }
 }
 
