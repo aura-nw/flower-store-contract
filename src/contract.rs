@@ -103,7 +103,7 @@ pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, Contract
     })?;
 
     Ok(Response::new()
-        .add_attribute("method", "sell")
+        .add_attribute("action", "sell")
         .add_attribute("id", id))
 }
 
