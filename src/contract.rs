@@ -82,7 +82,7 @@ pub fn add_new(
     }
     store(deps.storage).save(key, &flower)?;
     Ok(Response::new()
-        .add_attribute("method", "add_new")
+        .add_attribute("action", "add_new")
         .add_attribute("id", flower.id)
         .add_attribute("price", flower.price.to_string()))
 }
@@ -102,8 +102,7 @@ pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, Contract
         }
     })?;
 
-    Ok(Response::new()
-        .add_attribute("action", "sell"))
+    Ok(Response::new().add_attribute("action", "sell"))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
