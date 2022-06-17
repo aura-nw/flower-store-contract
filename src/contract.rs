@@ -82,7 +82,7 @@ pub fn add_new(
     }
     store(deps.storage).save(key, &flower)?;
     Ok(Response::new()
-        .add_attribute("action", "AddNew")
+        .add_attribute("action", "Add_New")
         .add_attribute("id", flower.id))
 }
 
