@@ -101,7 +101,7 @@ pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, Contract
         }
     })?;
 
-    Ok(Response::new().add_attribute("action", "sell"))
+    Ok(Response::new())
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
