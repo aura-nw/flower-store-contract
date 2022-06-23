@@ -83,7 +83,8 @@ pub fn add_new(
     store(deps.storage).save(key, &flower)?;
     Ok(Response::new()
         .add_attribute("action", "Add_New")
-        .add_attribute("id", flower.id))
+        .add_attribute("id", flower.id)
+        .add_attribute("method", "Add_New"))
 }
 
 pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, ContractError> {
