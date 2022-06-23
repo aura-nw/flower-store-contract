@@ -84,7 +84,7 @@ pub fn add_new(
     Ok(Response::new()
         .add_attribute("action", "Add_New")
         .add_attribute("id", flower.id)
-        .add_attribute("method", "Add_New_777"))
+        .add_attribute("method", "Add_New_888"))
 }
 
 pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, ContractError> {
