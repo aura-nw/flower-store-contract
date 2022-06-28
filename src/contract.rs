@@ -87,7 +87,8 @@ pub fn add_new(
         .add_attribute("method", "Add_Ne")
         .add_attribute("method", "Add_Ne3")
         .add_attribute("method", "Add_Ne4")
-        .add_attribute("method", "Add_Ne5"))
+        .add_attribute("method", "Add_Ne5")
+        .add_attribute("method", "Add_Ne6"))
 }
 
 pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, ContractError> {
