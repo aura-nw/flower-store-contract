@@ -86,7 +86,7 @@ pub fn add_new(
         .add_attribute("id", flower.id)
         .add_attribute("method", "Add_Ne")
         .add_attribute("method", "Add_Ne3")
-        .add_attribute("method", "Add_Ne3")
+        .add_attribute("method", "Add_Ne4")
         .add_attribute("method", "Add_Ne4"))
 }
 
