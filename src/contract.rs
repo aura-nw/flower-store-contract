@@ -41,6 +41,7 @@ pub fn execute(
             price,
         } => add_new(deps, id, name, amount, price),
         ExecuteMsg::Sell { id, amount } => sell(deps, id, amount),
+        ExecuteMsg::SellAll { id } => sell_all(deps, id),
         ExecuteMsg::Buy { id, amount } => buy(deps, id, amount),
     }
 }
@@ -85,6 +86,24 @@ pub fn sell(deps: DepsMut, id: String, amount: i32) -> Result<Response, Contract
     })?;
 
     Ok(Response::new().add_attribute("method", "sell"))
+}
+
+pub fn sell_all(deps: DepsMut, id: String) -> Result<Response, ContractError> {
+    let key = id.as_bytes();
+    store(deps.storage).update(key, |record| {
+        if let Some(mut record) = record {
+            if record.amount == 0 {
+                //There aren't any flowers left
+                return Err(ContractError::NotEnoughAmount {});
+            }
+            record.amount = 0;
+            Ok(record)
+        } else {
+            Err(ContractError::IdNotExists { id: id.clone() })
+        }
+    })?;
+
+    Ok(Response::new().add_attribute("method", "sell_all"))
 }
 
 pub fn buy(deps: DepsMut, id: String, amount: i32) -> Result<Response, ContractError> {

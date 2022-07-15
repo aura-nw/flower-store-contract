@@ -22,6 +22,9 @@ pub enum ExecuteMsg {
         id: String,
         amount: i32,
     },
+    SellAll {
+        id: String,
+    },
     Buy {
         id: String,
         amount: i32,

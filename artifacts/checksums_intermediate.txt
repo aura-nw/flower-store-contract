@@ -1,0 +1,1 @@
+cbdac0bf524ebf1659191b6d0df3813c58cc3b4126b893c6ce590f26b071ef07  ./target/wasm32-unknown-unknown/release/flower_store.wasm

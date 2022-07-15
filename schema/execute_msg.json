@@ -64,6 +64,26 @@
     {
       "type": "object",
       "required": [
+        "sell_all"
+      ],
+      "properties": {
+        "sell_all": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
         "buy"
       ],
       "properties": {
